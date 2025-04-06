@@ -29,9 +29,9 @@ class ClientServiceTest {
 
     @BeforeEach
     void setUp(){
-        Client client = new Client(1L, "Name1", "+799999999", "@gmail");
-        Client client2 = new Client(2L, "Name2", "+799999999", "@gmail");
-        Client client3 = new Client(3L, "Name3", "+799999999", "@gmail");
+        Client client = new Client(1L, "ИмяФИ", "7999999999", "W1@gmail.ru");
+        Client client2 = new Client(2L, "ИмяФИ", "7999999999", "W1@gmail.ru");
+        Client client3 = new Client(3L, "ИмяФИ", "7999999999", "W1@gmail.ru" );
         clients = Arrays.asList(client, client2, client3);
     }
 
@@ -65,7 +65,7 @@ class ClientServiceTest {
     @Test
     void updateClient() {
         Client updatedClient = clients.get(0);
-        updatedClient.setPhone("123231213");
+        updatedClient.setPhone("81111111111");
 
         when(clientRepository.findById(1L)).thenReturn(Optional.ofNullable(clients.get(0)));
         when(clientRepository.save(any(Client.class))).thenReturn(updatedClient);

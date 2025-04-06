@@ -28,6 +28,8 @@ class TimeTableServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
+    @Mock
+    private ClientService clientService;
 
     @InjectMocks
     private TimeTableService timeTableService;
@@ -105,14 +107,20 @@ class TimeTableServiceTest {
 
     @Test
     void reserve_ShouldCreateOrderAndDecreaseCount() {
+        when(clientService.checkClientExist(1L)).thenReturn(true);
         when(timeTableRepository.findByTime(testTime)).thenReturn(Optional.of(timeTable));
         when(orderRepository.findAllByClientId(1L)).thenReturn(List.of());
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(timeTableService.reserve(1L,testTime)).thenReturn(1L);
 
-        Long orderId = timeTableService.reserve(1L, testTime);
+        // Act
+        Long resultId = timeTableService.reserve(1L, testTime);
 
-        assertNotNull(orderId);
+        // Assert
+        assertNotNull(resultId);
+        assertEquals(1L, resultId);
+        assertEquals(9, timeTable.getCount()); // проверка уменьшения доступных мест
+
+        verify(clientService, times(1)).checkClientExist(1L);
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(timeTableRepository, times(1)).save(timeTable);
     }
@@ -126,6 +134,6 @@ class TimeTableServiceTest {
 
         verify(orderRepository, times(1)).delete(order);
         verify(timeTableRepository, times(1)).save(timeTable);
-        assertEquals(11, timeTable.getCount());
+        assertEquals(10, timeTable.getCount());
     }
 }

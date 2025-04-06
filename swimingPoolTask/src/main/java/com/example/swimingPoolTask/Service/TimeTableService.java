@@ -19,8 +19,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class TimeTableService {
-    TimeTableRepository timeTableRepository;
-    OrderRepository orderRepository;
+    private final TimeTableRepository timeTableRepository;
+    private final OrderRepository orderRepository;
+    private final ClientService clientService;
 
     public List<TimeTable> findAll() {
         return timeTableRepository.findAll();
@@ -44,7 +45,6 @@ public class TimeTableService {
                         o -> o.getTime().toLocalTime().toString(),
                         Collectors.summingInt(e -> 1)
                 ));
-
         Map<String, Integer> availableSlots = new LinkedHashMap<>();
         for (int hour = 8; hour <= 20; hour++) {
             String timeSlot = LocalTime.of(hour, 0).toString();
@@ -57,15 +57,15 @@ public class TimeTableService {
     }
 
     public Long reserve(Long clientId, LocalDateTime time) {
-
+        checkClientExist(clientId);
         TimeTable timeTable = this.findByTime(time)
                 .orElseGet(() -> new TimeTable(time, (byte) 10));
 
-        boolean alreadyBooked = orderRepository.findAllByClientId(clientId).stream()
-                .anyMatch(o -> o.getClientId()
-                        .equals(clientId));
+        boolean alreadyBooked = orderRepository.existsByClientIdAndTimeBetween(clientId,
+                time.toLocalDate().atStartOfDay(),
+                time.toLocalDate().atTime(23, 59));
         if (alreadyBooked) {
-            throw new RuntimeException( "Пользователь уже записан на этот день");
+            throw new RuntimeException("Пользователь уже записан на этот день");
         }
         if (timeTable.getCount() == 0) {
             throw new RuntimeException("Нет доступных мест");
@@ -75,7 +75,7 @@ public class TimeTableService {
         order.setClientId(clientId);
         order.setTime(time);
 
-        orderRepository.save(order);
+        order = orderRepository.save(order);
         timeTable.setCount((byte) (timeTable.getCount() - 1));
         this.save(timeTable);
 
@@ -84,7 +84,7 @@ public class TimeTableService {
     }
 
     public void cancel(Long clientId, Long orderId) {
-
+        checkClientExist(clientId);
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Запись с ID " + orderId + " не найдена"));
@@ -100,5 +100,10 @@ public class TimeTableService {
 
         log.info("Запись отменена: {}", order);
 
+    }
+
+    public void checkClientExist(Long clientId) {
+        if (!clientService.checkClientExist(clientId))
+            throw new IllegalArgumentException("Клиент с id: " + clientId + " не найден");
     }
 }

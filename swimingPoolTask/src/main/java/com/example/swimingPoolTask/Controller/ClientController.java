@@ -5,6 +5,7 @@ import com.example.swimingPoolTask.Service.ClientService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,15 +21,13 @@ public class ClientController {
     }
 
     @GetMapping("/all")
-    public List<Client> getAllClient() {
-        System.out.println(clientService.findAll());
-        return clientService.findAll();
+    public ResponseEntity<List<Client>> getAllClient() {
+        return ResponseEntity.ok(clientService.findAll());
     }
 
     @GetMapping("/{id}")
-    public Client getClientById(@PathVariable Long id) {
-        System.out.println(clientService.getClientById(id).toString());
-        return clientService.getClientById(id);
+    public ResponseEntity<Client> getClientById(@PathVariable Long id) {
+        return ResponseEntity.ok(clientService.getClientById(id));
     }
 
     @PostMapping("/add")

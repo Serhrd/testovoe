@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    Long clientId;
-    LocalDateTime time;
+    private Long id;
+    private Long clientId;
+    private LocalDateTime time;
 }
