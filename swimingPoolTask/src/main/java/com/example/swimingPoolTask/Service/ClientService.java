@@ -22,7 +22,6 @@ public class ClientService {
         return clientRepository.findAll();
     }
 
-    // Проверить
     public Client getClientById(Long id) {
         return clientRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Клиент с ID " + id + " не найден"));
     }
